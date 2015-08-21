@@ -1,0 +1,17 @@
+{
+  "name": "image-loader",
+  "version": "0.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Matthew McKey <mc@staplez.io> (http://staplez.io/)",
+  "license": "ISC",
+  "dependencies": {
+    "requirejs": "~2.1.20",
+    "express": "~4.13.3",
+    "request": "~2.61.0",
+    "body-parser": "~1.13.3"
+  }
+}

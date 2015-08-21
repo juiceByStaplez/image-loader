@@ -5,41 +5,66 @@ $(document).ready(function(){
   var ctx = canvas.getContext('2d');
   var imgData;
 
+
+
   $('#loadImg').click(function(event) {
     var container = $('.container');
     var image = container.append('<img src="http://1x1px.me/FF4D00-0.0.png" class="drag">');
     var images = container.children('img');
     var imgUrl = $('#img_url').val();
-    var downloadingImage = new Image();
+    $.post('/img-to-base64', {
+      imgUrl: imgUrl
+    }, function(base64URL) {
+      var downloadingImage = new Image();
+    // console.log(base64URL);
     downloadingImage.onload = function() {
       images[imgCount].src = this.src;
       var scaledHeight = downloadingImage.height * scale;
       var scaledWidth = downloadingImage.width * scale;
+      var cHeight = canvas.height;
+      var cWidth = canvas.width;
       $(images[imgCount]).attr('width', scaledWidth).attr('height', scaledHeight);
       // attach the dragging function
       $(images[imgCount]).drags();
       $(images[imgCount]).on('dblclick', function() {
         // resize the canvas if needed
-        if(downloadingImage.height > canvas.height) {
-          canvas.height = downloadingImage.height;
+        if(downloadingImage.height > cHeight) {
+          cHeight = downloadingImage.height;
         }
-        if(downloadingImage.width > canvas.width) {
-          canvas.width = downloadingImage.width;
+        if(downloadingImage.width > cWidth) {
+          cWidth = downloadingImage.width;
         }
         // clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         // draw image to original height / width on canvas
         ctx.drawImage(downloadingImage, 0, 0, downloadingImage.width, downloadingImage.height);
+        // get ImageData to manipulate
+        var imageData = ctx.getImageData(0, 0, downloadingImage.width, downloadingImage.height);
+        var data = imageData.data;
+        // loop through pixels, raise the blue channel by 100
+        for(var i = 0; i < data.length; i += 4) {
+           data[i + 2] = data[i+2]+100;
+        }
+        ctx.putImageData(imageData, 0, 0);
       });
       imgCount++;
     }
-    downloadingImage.src = imgUrl;
+    downloadingImage.src = base64URL;
+    });
+
+
   });
 
 $('#blueButton').click(function() {
   alert('This feature could not be implemented due to Cross Origin Research Sharing limitations.');
 });
 
+
+function setPixel(imageData, x, y, b) {
+  index = (imageData.width) * 4;
+  console.log(imageData.data);
+  imageData.data[index+2] = b;
+}
 
 // quick google solution for draggable elements
   $.fn.drags = function(opt) {
