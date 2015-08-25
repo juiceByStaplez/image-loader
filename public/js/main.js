@@ -6,7 +6,8 @@ $(document).ready(function(){
 
 
 
-  $('#loadImg').click(function(event) {
+  $('#loadImg').submit(function(event) {
+    event.preventDefault();
     var imgUrl = $('#img_url').val();
     var base64img = getBase64(imgUrl);
     base64img.done(function(data) {
