@@ -3,7 +3,7 @@ var request = require('request');
 
 module.exports = function(app) {
   app.get('*', function(req, res) {
-    res.sendFile('public/index.html');
+    res.sendFile(__dirname+'../../public/index.html');
   });
 
   app.post('/img-to-base64', function(req, res) {
