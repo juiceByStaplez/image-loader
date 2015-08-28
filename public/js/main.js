@@ -1,9 +1,5 @@
 $(document).ready(function(){
   var scale = 0.5;
-  // var canvas = document.getElementById('selectedImg');
-  // var ctx = canvas.getContext('2d');
-  var canvasImage;
-  var canvasState = false;
 
 
   $('#loadImg').submit(function(event) {
@@ -16,15 +12,15 @@ $(document).ready(function(){
   });
 
   $('#blueButton').click(function() {
-    if(canvasImage) {
-      blueImage(canvasImage);
-    }
+    // get selected canvas
+    var selectedCanvas = document.querySelectorAll('.selected');
+    // get the first index to have a reference to the HTMLCanvasElement
+    selectedCanvas = selectedCanvas[0];
+    blueImage(selectedCanvas);
   });
 
 function getBase64(url) {
-  var base64string = '';
-  var request = $.post('/img-to-base64', {imgUrl: url});
-  return request;
+  return $.post('/img-to-base64', {imgUrl: url});
 }
 
 function loadImage(base64) {
@@ -57,52 +53,27 @@ function loadImage(base64) {
     if(fullsize == false) {
       fullsize = true;
       newContext.drawImage(image, 0, 0, image.width, image.height);
+      $('.selected').removeClass('selected');
+      $(newCanvas).addClass('selected');
     } else {
       fullsize = false;
       newContext.drawImage(image, 0, 0, scaledWidth, scaledHeight);
     }
     });
 
-  // $(canvas).on('dblclick', function(e) {
-  //   swapPos(image, this);
-  // });
 }
 
-function blueImage(img) {
-  // get ImageData to manipulate
-  var imageData = ctx.getImageData(0, 0, img.width, img.height);
-  var data = imageData.data;
-  // loop through pixels, raise the blue channel by 100
-  for(var i = 0; i < data.length; i += 4) {
-  data[i + 2] = data[i+2]+100;
-  }
-  ctx.putImageData(imageData, 0, 0);
-}
-
-
-function swapPos(img, canvas) {
-  var imgPos = $(img).offset();
-  var canvasPos = $(canvas).offset();
-  if($(img).css('opacity') == 0) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    canvasState = false;
-    $(img).css('opacity', 1);
-    $(canvas).offset({
-      top: canvasPos.top,
-      left: canvasPos.left
-    });
-  } else {
-    if(canvasState == false) {
-      ctx.drawImage(canvasImage, 0, 0, canvasImage.width, canvasImage.height);
+function blueImage(canvas) {
+    var ctx = canvas.getContext('2d');
+    // get ImageData to manipulate
+    var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    var data = imageData.data;
+    // loop through pixels, raise the blue channel by 100
+    for(var i = 0; i < data.length; i += 4) {
+    data[i + 2] = data[i+2]+100;
     }
-    $(img).css('opacity', 0);
-    $(canvas).offset({
-      top: imgPos.top,
-      left: imgPos.left
-    });
-  }
+    ctx.putImageData(imageData, 0, 0);
 }
-
 
 // quick google solution for draggable elements
 $.fn.drags = function(opt) {
@@ -144,7 +115,5 @@ $.fn.drags = function(opt) {
           });
 
         }
-
-$(canvas).drags();
 
 });
