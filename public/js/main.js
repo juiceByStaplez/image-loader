@@ -3,7 +3,7 @@ $(document).ready(function(){
   var canvas = document.getElementById('selectedImg');
   var ctx = canvas.getContext('2d');
   var canvasImage;
-
+  var canvasState = false;
 
 
   $('#loadImg').submit(function(event) {
@@ -16,7 +16,9 @@ $(document).ready(function(){
   });
 
   $('#blueButton').click(function() {
-    blueImage(canvasImage);
+    if(canvasImage) {
+      blueImage(canvasImage);
+    }
   });
 
 function getBase64(url) {
@@ -36,7 +38,8 @@ function loadImage(base64) {
   image.setAttribute('width', scaledWidth);
   container.appendChild(image);
   $(image).drags();
-  $(image).on('dblclick', function(image) {
+  $(image).on('dblclick', function(e) {
+
     canvasImage = new Image();
     canvasImage.src = base64;
     // resize the canvas if needed
@@ -46,11 +49,20 @@ function loadImage(base64) {
     if(canvasImage.width > canvas.width) {
       canvas.width = canvasImage.width;
     }
+
+    swapPos(this, canvas);
+
+
       // clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       // draw image to original height / width on canvas
       ctx.drawImage(canvasImage, 0, 0, canvasImage.width, canvasImage.height);
+      canvasState = true;
     });
+
+  $(canvas).on('dblclick', function(e) {
+    swapPos(image, this);
+  });
 }
 
 function blueImage(img) {
@@ -63,6 +75,30 @@ function blueImage(img) {
   }
   ctx.putImageData(imageData, 0, 0);
 }
+
+function swapPos(img, canvas) {
+  var imgPos = $(img).offset();
+  var canvasPos = $(canvas).offset();
+  if($(img).css('opacity') == 0) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    canvasState = false;
+    $(img).css('opacity', 1);
+    $(canvas).offset({
+      top: canvasPos.top,
+      left: canvasPos.left
+    });
+  } else {
+    if(canvasState == false) {
+      ctx.drawImage(canvasImage, 0, 0, canvasImage.width, canvasImage.height);
+    }
+    $(img).css('opacity', 0);
+    $(canvas).offset({
+      top: imgPos.top,
+      left: imgPos.left
+    });
+  }
+}
+
 
 // quick google solution for draggable elements
 $.fn.drags = function(opt) {
@@ -104,4 +140,7 @@ $.fn.drags = function(opt) {
           });
 
         }
-      });
+
+$(canvas).drags();
+
+});
