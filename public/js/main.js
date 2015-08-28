@@ -1,7 +1,7 @@
 $(document).ready(function(){
   var scale = 0.5;
-  var canvas = document.getElementById('selectedImg');
-  var ctx = canvas.getContext('2d');
+  // var canvas = document.getElementById('selectedImg');
+  // var ctx = canvas.getContext('2d');
   var canvasImage;
   var canvasState = false;
 
@@ -29,40 +29,43 @@ function getBase64(url) {
 
 function loadImage(base64) {
   var container = document.getElementById('container');
+  var newCanvas = document.createElement('canvas');
+  var newContext = newCanvas.getContext('2d');
+  var fullsize = false;
   var image = new Image();
+  image.onload = function() {
+    newContext.drawImage(image, 0, 0, scaledWidth, scaledHeight);
+  }
   image.src = base64;
-  image.classList.add('drag');
   var scaledHeight = image.height * scale;
   var scaledWidth = image.width * scale;
-  image.setAttribute('height', scaledHeight);
-  image.setAttribute('width', scaledWidth);
-  container.appendChild(image);
-  $(image).drags();
-  $(image).on('dblclick', function(e) {
-
-    canvasImage = new Image();
-    canvasImage.src = base64;
+  newCanvas.height = scaledHeight;
+  newCanvas.width = scaledWidth;
+  container.appendChild(newCanvas);
+  $(newCanvas).drags();
+  $(newCanvas).on('dblclick', function(e) {
     // resize the canvas if needed
-    if(canvasImage.height > canvas.height) {
-      canvas.height = canvasImage.height;
+    if(image.height > newCanvas.height) {
+      newCanvas.height = image.height;
     }
-    if(canvasImage.width > canvas.width) {
-      canvas.width = canvasImage.width;
+    if(image.width > newCanvas.width) {
+      newCanvas.width = image.width;
     }
-
-    swapPos(this, canvas);
-
-
-      // clear canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // draw image to original height / width on canvas
-      ctx.drawImage(canvasImage, 0, 0, canvasImage.width, canvasImage.height);
-      canvasState = true;
+    // clear canvas
+    newContext.clearRect(0, 0, newCanvas.width, newCanvas.height);
+    // draw image to original height / width on canvas
+    if(fullsize == false) {
+      fullsize = true;
+      newContext.drawImage(image, 0, 0, image.width, image.height);
+    } else {
+      fullsize = false;
+      newContext.drawImage(image, 0, 0, scaledWidth, scaledHeight);
+    }
     });
 
-  $(canvas).on('dblclick', function(e) {
-    swapPos(image, this);
-  });
+  // $(canvas).on('dblclick', function(e) {
+  //   swapPos(image, this);
+  // });
 }
 
 function blueImage(img) {
@@ -75,6 +78,7 @@ function blueImage(img) {
   }
   ctx.putImageData(imageData, 0, 0);
 }
+
 
 function swapPos(img, canvas) {
   var imgPos = $(img).offset();
